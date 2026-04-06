@@ -5,6 +5,9 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 
+COPY client/package*.json ./client/
+RUN npm ci --prefix client
+
 COPY . .
 RUN npm run build
 
@@ -20,6 +23,7 @@ COPY package*.json ./
 RUN npm ci --omit=dev
 
 COPY --from=build /app/dist ./dist
+COPY --from=build /app/public ./public
 
 EXPOSE 3000
 
