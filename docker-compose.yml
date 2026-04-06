@@ -10,6 +10,8 @@ services:
     environment:
       PORT: "3000"
       BASE_URL: "https://tranz4.org"
+      JWT_SECRET: "${JWT_SECRET}"
+      JWT_EXPIRES_IN: "${JWT_EXPIRES_IN:-1h}"
       UPLOAD_DIR: "/data/uploads"
     volumes:
       - /mnt/media/transfers/uploads:/data/uploads
