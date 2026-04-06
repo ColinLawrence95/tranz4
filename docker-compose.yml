@@ -12,6 +12,7 @@ services:
       BASE_URL: "https://tranz4.org"
       JWT_SECRET: "${JWT_SECRET}"
       JWT_EXPIRES_IN: "${JWT_EXPIRES_IN:-1h}"
+      DOWNLOAD_LINK_TTL: "${DOWNLOAD_LINK_TTL:-24h}"
       UPLOAD_DIR: "/data/uploads"
       AUTH_USERNAME: "${AUTH_USERNAME}"
       AUTH_PASSWORD: "${AUTH_PASSWORD}"

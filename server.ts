@@ -12,7 +12,7 @@ const PORT = Number.parseInt(process.env.PORT ?? "3000", 10);
 const BASE_URL = process.env.BASE_URL ?? `http://tranz4.org:${PORT}`;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
 app.use(express.static("public"));
 
 //Download — auth handled inside router via per-file signed token

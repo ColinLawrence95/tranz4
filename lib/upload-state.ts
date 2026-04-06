@@ -64,7 +64,41 @@ function createStorage(): multer.StorageEngine {
 ensureUploadDirectory();
 const storage = createStorage();
 
+/** Max upload size — default 500 MB, overridable via MAX_UPLOAD_MB env var */
+const maxFileMb = parseInt(process.env.MAX_UPLOAD_MB ?? "500", 10);
+
 /**
  * Shared Multer uploader middleware configured with disk storage.
  */
-export const upload = multer({ storage });
+export const upload = multer({ storage, limits: { fileSize: maxFileMb * 1024 * 1024 } });
+
+/**
+ * Converts a TTL string like "24h", "7d", "30m" to milliseconds.
+ * Falls back to 24h if the format isn't recognised.
+ */
+function ttlToMs(ttl: string): number {
+    const match = ttl.match(/^(\d+)([smhd])$/);
+    if (!match) return 24 * 60 * 60 * 1000;
+    const n = parseInt(match[1], 10);
+    const units: Record<string, number> = { s: 1_000, m: 60_000, h: 3_600_000, d: 86_400_000 };
+    return n * units[match[2]];
+}
+
+/**
+ * Schedules a file to be deleted from disk and removed from the in-memory store
+ * once its download link TTL has elapsed. This keeps the server clean without
+ * needing a separate cron job.
+ */
+export function scheduleFileDeletion(fileId: string, ttl: string): void {
+    const delayMs = ttlToMs(ttl);
+    setTimeout(() => {
+        const file = files[fileId];
+        if (!file) return;
+        fs.unlink(file.path, (err) => {
+            if (err && err.code !== "ENOENT") {
+                console.error(`Failed to delete file ${fileId}:`, err);
+            }
+        });
+        delete files[fileId];
+    }, delayMs);
+}

@@ -7,7 +7,7 @@ export function issueUploadToken() {
     return token;
 }
 /**
- * Consumes a one-time upload token.
+ * Consumes a one time upload token.
  * Returns true and removes the token if valid; false if invalid or already used.
  */
 export function consumeUploadToken(token) {
