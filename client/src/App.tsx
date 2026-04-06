@@ -147,14 +147,35 @@ function App() {
 
                 {state.phase === "done" && (
                     <div className="flex flex-col gap-3">
-                        <p className="text-sm text-neutral-300">Upload complete.</p>
+                        <p className="text-sm text-neutral-300">
+                            Upload complete. Share this link:
+                        </p>
+                        {/* Selectable text box so the link can be copied and sent */}
+                        <div className="flex items-center gap-2">
+                            <input
+                                readOnly
+                                value={(state as { phase: "done"; link: string }).link}
+                                className="w-full rounded-md border border-neutral-700 bg-neutral-950 px-3 py-2 text-xs text-neutral-300 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-text"
+                                onFocus={(e) => e.currentTarget.select()}
+                            />
+                            <button
+                                onClick={() =>
+                                    navigator.clipboard.writeText(
+                                        (state as { phase: "done"; link: string }).link,
+                                    )
+                                }
+                                className="shrink-0 rounded-md border border-neutral-700 px-3 py-2 text-xs text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                            >
+                                Copy
+                            </button>
+                        </div>
                         <a
                             href={(state as { phase: "done"; link: string }).link}
                             target="_blank"
                             rel="noreferrer"
                             className="block rounded-md border border-blue-600 px-3 py-2 text-center text-sm text-blue-400 hover:bg-blue-600 hover:text-white transition-colors"
                         >
-                            Open download link
+                            Open
                         </a>
                         <button
                             onClick={() => setState({ phase: "login" })}
