@@ -13,5 +13,7 @@ services:
       JWT_SECRET: "${JWT_SECRET}"
       JWT_EXPIRES_IN: "${JWT_EXPIRES_IN:-1h}"
       UPLOAD_DIR: "/data/uploads"
+      AUTH_USERNAME: "${AUTH_USERNAME}"
+      AUTH_PASSWORD: "${AUTH_PASSWORD}"
     volumes:
       - /mnt/media/transfers/uploads:/data/uploads
