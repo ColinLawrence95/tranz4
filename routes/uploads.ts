@@ -14,11 +14,11 @@ const router = express.Router();
 export default function createUploadRouter({
     upload,
     files,
-    port,
+    baseUrl,
 }: {
     upload: multer.Multer;
     files: FileStore;
-    port: number;
+    baseUrl: string;
 }) {
     router.post("/", upload.single("file"), (req, res) => {
         if (!req.file) {
@@ -29,7 +29,7 @@ export default function createUploadRouter({
         // Store the file metadata in the in-memory file index
         files[fileId] = { path: req.file.path, originalname: req.file.originalname };
         // Respond with the download link for the uploaded file
-        res.json({ link: `http://localhost:${port}/download/${fileId}` });
+        res.json({ link: `${baseUrl}/download/${fileId}` });
     });
     return router;
 }

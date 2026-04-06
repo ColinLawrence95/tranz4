@@ -19,7 +19,7 @@ export type FileStore = Record<string, StoredFile>;
 /**
  * Directory where uploaded files are persisted.
  */
-export const UPLOAD_DIR = "uploads";
+export const UPLOAD_DIR = process.env.UPLOAD_DIR ?? "uploads";
 
 /**
  * Shared in-memory file index used by upload and download routes.
@@ -31,7 +31,7 @@ export const files: FileStore = {};
  */
 function ensureUploadDirectory(): void {
     if (!fs.existsSync(UPLOAD_DIR)) {
-        fs.mkdirSync(UPLOAD_DIR);
+        fs.mkdirSync(UPLOAD_DIR, { recursive: true });
     }
 }
 

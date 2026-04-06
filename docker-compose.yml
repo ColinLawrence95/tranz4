@@ -1,0 +1,15 @@
+services:
+  tranz4:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tranz4
+    restart: unless-stopped
+    ports:
+      - "3010:3000"
+    environment:
+      PORT: "3000"
+      BASE_URL: "https://tranz4.org"
+      UPLOAD_DIR: "/data/uploads"
+    volumes:
+      - /mnt/media/transfers/uploads:/data/uploads
