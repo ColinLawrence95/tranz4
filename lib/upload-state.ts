@@ -64,13 +64,17 @@ function createStorage(): multer.StorageEngine {
 ensureUploadDirectory();
 const storage = createStorage();
 
-/** Max upload size — default 500 MB, overridable via MAX_UPLOAD_MB env var */
-const maxFileMb = parseInt(process.env.MAX_UPLOAD_MB ?? "500", 10);
+/** Optional upload size cap in MB. Leave unset for unlimited uploads. */
+const maxUploadMbRaw = process.env.MAX_UPLOAD_MB;
+const maxUploadMb = maxUploadMbRaw ? Number.parseInt(maxUploadMbRaw, 10) : Number.NaN;
+const hasUploadCap = Number.isFinite(maxUploadMb) && maxUploadMb > 0;
 
 /**
  * Shared Multer uploader middleware configured with disk storage.
  */
-export const upload = multer({ storage, limits: { fileSize: maxFileMb * 1024 * 1024 } });
+export const upload = hasUploadCap
+    ? multer({ storage, limits: { fileSize: maxUploadMb * 1024 * 1024 } })
+    : multer({ storage });
 
 /**
  * Converts a TTL string like "24h", "7d", "30m" to milliseconds.
