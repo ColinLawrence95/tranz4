@@ -27,6 +27,8 @@ function App() {
     const [status, setStatus] = useState("");
     /** Something went wrong — shown in red below the form */
     const [error, setError] = useState("");
+    /** Upload percentage (0-100) while a file is being sent */
+    const [uploadProgress, setUploadProgress] = useState<number | null>(null);
 
     /**
      * Login form handler — sends credentials to `/auth/token` and, if they check out,
@@ -71,21 +73,58 @@ function App() {
         setError("");
         setStatus("Uploading\u2026");
         const form = new FormData(e.currentTarget);
-        const res = await fetch("/upload/", {
-            method: "POST",
-            headers: { Authorization: `Bearer ${state.token}` },
-            body: form,
-        });
-        const data = await res.json();
-        if (!res.ok) {
-            setError(data.error ?? "Upload failed");
+        setUploadProgress(0);
+
+        try {
+            const data = await new Promise<{ link?: string; error?: string }>((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open("POST", "/upload/");
+                xhr.setRequestHeader("Authorization", `Bearer ${state.token}`);
+
+                xhr.upload.onprogress = (event) => {
+                    if (!event.lengthComputable) return;
+                    const percent = Math.round((event.loaded / event.total) * 100);
+                    setUploadProgress(percent);
+                };
+
+                xhr.onerror = () => reject(new Error("Network error"));
+                xhr.onload = () => {
+                    let payload: { link?: string; error?: string } = {};
+                    try {
+                        payload = JSON.parse(xhr.responseText) as { link?: string; error?: string };
+                    } catch {
+                        if (xhr.status >= 200 && xhr.status < 300) {
+                            reject(new Error("Unexpected server response"));
+                            return;
+                        }
+                    }
+
+                    if (xhr.status < 200 || xhr.status >= 300) {
+                        reject(new Error(payload.error ?? "Upload failed"));
+                        return;
+                    }
+
+                    resolve(payload);
+                };
+
+                xhr.send(form);
+            });
+
+            if (!data.link) {
+                throw new Error("Upload succeeded but no link was returned");
+            }
+
+            setState({ phase: "done", link: data.link });
+            setStatus("");
+        } catch (err) {
+            const message = err instanceof Error ? err.message : "Upload failed";
+            setError(message);
             setStatus("");
             // Token is burned whether the upload worked or not, so back to login
             setState({ phase: "login" });
-            return;
+        } finally {
+            setUploadProgress(null);
         }
-        setState({ phase: "done", link: data.link });
-        setStatus("");
     }
 
     // Reusable Tailwind strings — saves typing the same thing on every input/button
@@ -187,6 +226,17 @@ function App() {
                 )}
 
                 {status && <p className="mt-3 text-xs text-neutral-500">{status}</p>}
+                {uploadProgress !== null && (
+                    <div className="mt-3">
+                        <div className="h-2 w-full overflow-hidden rounded-full bg-neutral-800">
+                            <div
+                                className="h-full bg-blue-500 transition-all"
+                                style={{ width: `${uploadProgress}%` }}
+                            />
+                        </div>
+                        <p className="mt-1 text-xs text-neutral-400">{uploadProgress}%</p>
+                    </div>
+                )}
                 {error && <p className="mt-3 text-xs text-red-400">{error}</p>}
             </div>
         </div>
