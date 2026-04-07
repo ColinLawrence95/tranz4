@@ -80,6 +80,8 @@ function App() {
                 const xhr = new XMLHttpRequest();
                 xhr.open("POST", "/upload/");
                 xhr.setRequestHeader("Authorization", `Bearer ${state.token}`);
+                // Allow long uploads on slower mobile connections.
+                xhr.timeout = 30 * 60 * 1000;
 
                 xhr.upload.onprogress = (event) => {
                     if (!event.lengthComputable) return;
@@ -88,6 +90,11 @@ function App() {
                 };
 
                 xhr.onerror = () => reject(new Error("Network error"));
+                xhr.ontimeout = () =>
+                    reject(
+                        new Error("Upload timed out. Please try again on a stronger connection."),
+                    );
+                xhr.onabort = () => reject(new Error("Upload was cancelled before completion."));
                 xhr.onload = () => {
                     let payload: { link?: string; error?: string } = {};
                     try {
@@ -100,7 +107,12 @@ function App() {
                     }
 
                     if (xhr.status < 200 || xhr.status >= 300) {
-                        reject(new Error(payload.error ?? "Upload failed"));
+                        reject(
+                            new Error(
+                                payload.error ??
+                                    `Upload failed (HTTP ${xhr.status}${xhr.statusText ? ` ${xhr.statusText}` : ""})`,
+                            ),
+                        );
                         return;
                     }
 
