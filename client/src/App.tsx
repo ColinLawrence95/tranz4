@@ -45,8 +45,8 @@ function App() {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                username: form.get("username"),
-                password: form.get("password"),
+                username: (form.get("username") as string)?.trim(),
+                password: (form.get("password") as string)?.trim(),
             }),
         });
         const data = await res.json();

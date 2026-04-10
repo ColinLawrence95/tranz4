@@ -69,6 +69,6 @@ export default function createUploadRouter({
             res.json({ link });
         },
     );
-
+    
     return router;
 }
