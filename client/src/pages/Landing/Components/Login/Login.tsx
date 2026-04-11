@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 
 /**
  * Props accepted by the login page component.
@@ -51,10 +52,15 @@ function Login({ onAuthenticated }: LoginProps) {
     }
 
     const message = error || status;
-    const messageClass = error ? "text-red-500" : "text-gray-400";
+    const messageClass = error ? "text-[#c24e01]" : "text-gray-400";
 
     return (
-        <div className="flex h-100 w-100 flex-col items-center justify-center gap-4 bg-gray-900">
+        <motion.div
+            className="flex h-100 w-100 flex-col items-center justify-center gap-4 bg-gray-900"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+        >
             <h1 className="text-2xl">TRANZ4</h1>
             <form onSubmit={handleLogin} className="flex w-65 flex-col gap-4">
                 <div className="flex flex-col gap-1">
@@ -64,7 +70,7 @@ function Login({ onAuthenticated }: LoginProps) {
                         type="text"
                         required
                         autoComplete="username"
-                        className="block w-full border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500"
+                        className="w-full border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-gray-300 focus:outline-none focus:ring-2 focus:ring-[#c24e01]"
                     />
                 </div>
                 <div className="flex flex-col gap-1">
@@ -74,19 +80,19 @@ function Login({ onAuthenticated }: LoginProps) {
                         type="password"
                         required
                         autoComplete="current-password"
-                        className="block w-full border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500"
+                        className="w-full border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-gray-300 focus:outline-none focus:ring-2 focus:ring-[#c24e01]"
                     />
                 </div>
 
                 <button
                     type="submit"
-                    className="bg-gray-950 px-4 py-2 text-white transition-colors duration-200 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+                    className="bg-gray-950 px-4 py-2 text-white transition-colors duration-200 hover:bg-[#a84301] focus:outline-none focus:ring-2 focus:ring-[#c24e01]"
                 >
                     Generate Token
                 </button>
                 <p className={`min-h-5 text-sm ${messageClass}`}>{message || " "}</p>
             </form>
-        </div>
+        </motion.div>
     );
 }
 export default Login;

@@ -20,12 +20,19 @@ function FileUploader({ token }: FileUploaderProps) {
     const [link, setLink] = useState("");
     const [copied, setCopied] = useState(false);
     const [progress, setProgress] = useState<number | null>(null);
+    const [isNavigatingAway, setIsNavigatingAway] = useState(false);
 
     /** Copies the generated download link to the system clipboard. */
     function copyLink() {
         navigator.clipboard.writeText(link);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
+    }
+
+    /** Plays an exit transition before routing back to the landing page. */
+    function handleUploadAgain() {
+        setIsNavigatingAway(true);
+        setTimeout(() => navigate("/"), 300);
     }
 
     /**
@@ -100,11 +107,11 @@ function FileUploader({ token }: FileUploaderProps) {
                                 type="file"
                                 name="file"
                                 required
-                                className="block w-full cursor-pointer border border-gray-700 bg-gray-900 text-sm text-gray-300 focus:ring-2 focus:ring-red-500 focus:outline-none file:mr-4 file:cursor-pointer file:border-0 file:bg-gray-950 file:px-2 file:py-2 file:font-medium file:text-white hover:file:bg-red-700"
+                                className="w-full cursor-pointer border border-gray-700 bg-gray-950 text-sm text-gray-300 focus:ring-2 focus:ring-[#c24e01] focus:outline-none file:mr-4 file:cursor-pointer file:border-0 file:bg-[#c24e01] file:px-2 file:py-2 file:font-medium file:text-white hover:file:bg-[#a84301]"
                             />
                             <button
                                 type="submit"
-                                className="bg-gray-950 px-4 py-2 text-white transition-colors duration-200 hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:outline-none"
+                                className="bg-gray-950 px-4 py-2 text-white transition-colors duration-200 hover:bg-[#a84301] focus:ring-2 focus:ring-[#c24e01] focus:outline-none"
                             >
                                 Upload
                             </button>
@@ -112,22 +119,20 @@ function FileUploader({ token }: FileUploaderProps) {
                         <div className="w-76 flex flex-col items-center">
                             <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-800">
                                 <div
-                                    className="h-full bg-red-600 transition-all duration-200"
+                                    className="h-full bg-[#c24e01] transition-all duration-200"
                                     style={{ width: `${progress ?? 0}%` }}
                                 />
                             </div>
-                            <p className="mt-1 text-right text-xs text-gray-500">
-                                {progress ?? 0}%
-                            </p>
+                            <p className="mt-1 text-xs text-gray-500">{progress ?? 0}%</p>
                         </div>
-                        {error && <p className="text-sm text-red-500">{error}</p>}
+                        {error && <p className="text-sm text-[#c24e01]">{error}</p>}
                     </motion.div>
                 ) : (
                     <motion.div
                         key="link-panel"
                         className="w-75"
                         initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
+                        animate={isNavigatingAway ? { opacity: 0, y: -8 } : { opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -8 }}
                         transition={{ duration: 0.3 }}
                     >
@@ -138,22 +143,23 @@ function FileUploader({ token }: FileUploaderProps) {
                                     readOnly
                                     value={link}
                                     onFocus={(event) => event.currentTarget.select()}
-                                    className="flex-1 border border-gray-700 bg-gray-950 px-3 py-2 text-xs text-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500"
+                                    className="flex-1 border border-gray-700 bg-gray-950 px-3 py-2 text-xs text-gray-300 focus:outline-none focus:ring-2 focus:ring-[#c24e01]"
                                 />
                                 <button
                                     type="button"
                                     onClick={copyLink}
-                                    className="shrink-0 border border-gray-700 px-3 py-2 text-xs text-gray-400 transition-colors focus:outline-none duration-200 hover:bg-red-700 hover:text-white focus:ring-2 focus:ring-red-500"
+                                    className="shrink-0 border border-gray-700 px-3 py-2 text-xs text-gray-400 transition-colors focus:outline-none duration-200 hover:bg-[#a84301] hover:text-white focus:ring-2 focus:ring-[#c24e01]"
                                 >
                                     {copied ? "Copied!" : "Copy"}
                                 </button>
                             </div>
                             <button
                                 type="button"
-                                onClick={() => navigate("/")}
-                                className="bg-gray-950 px-4 py-2 text-white transition-colors duration-200 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+                                onClick={handleUploadAgain}
+                                disabled={isNavigatingAway}
+                                className="bg-gray-950 px-4 py-2 text-white transition-colors duration-200 hover:bg-[#a84301] focus:outline-none focus:ring-2 focus:ring-[#c24e01]"
                             >
-                                Upload Again
+                                {isNavigatingAway ? "Returning..." : "Upload Again"}
                             </button>
                         </div>
                     </motion.div>
