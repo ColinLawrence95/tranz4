@@ -15,7 +15,7 @@ function UploadPage() {
     }
 
     return (
-        <div className="text-white min-h-screen flex items-center justify-center">
+        <div className="text-white min-h-svh max-h-svh flex items-center justify-center">
             <FileUploader token={token} />
         </div>
     );

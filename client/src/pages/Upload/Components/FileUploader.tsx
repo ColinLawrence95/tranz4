@@ -90,7 +90,7 @@ function FileUploader({ token }: FileUploaderProps) {
     }
 
     return (
-        <div className="flex h-100 w-100 flex-col items-center justify-center gap-4 bg-gray-900">
+        <div className="flex h-85 w-85 md:h-100 md:w-100 flex-col items-center justify-center gap-4 bg-gray-900">
             <AnimatePresence mode="wait">
                 {!link ? (
                     <motion.div
@@ -107,7 +107,7 @@ function FileUploader({ token }: FileUploaderProps) {
                                 type="file"
                                 name="file"
                                 required
-                                className="w-full cursor-pointer border border-gray-700 bg-gray-950 text-sm text-gray-300 focus:ring-2 focus:ring-[#c24e01] focus:outline-none file:mr-4 file:cursor-pointer file:border-0 file:bg-[#c24e01] file:px-2 file:py-2 file:font-medium file:text-white hover:file:bg-[#a84301]"
+                                className="w-80 cursor-pointer border border-gray-700 bg-gray-950 text-sm text-gray-300 focus:ring-2 focus:ring-[#c24e01] focus:outline-none file:mr-4 file:cursor-pointer file:border-0 file:bg-[#c24e01] file:px-2 file:py-2 file:font-medium file:text-white hover:file:bg-[#a84301]"
                             />
                             <button
                                 type="submit"

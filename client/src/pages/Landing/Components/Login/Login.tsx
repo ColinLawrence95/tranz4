@@ -56,7 +56,7 @@ function Login({ onAuthenticated }: LoginProps) {
 
     return (
         <motion.div
-            className="flex h-100 w-100 flex-col items-center justify-center gap-4 bg-gray-900"
+            className="flex h-85 w-85 flex-col items-center justify-center gap-4 bg-gray-900"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}

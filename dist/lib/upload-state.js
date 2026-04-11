@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from "uuid";
  * Directory where uploaded files are persisted.
  */
 export const UPLOAD_DIR = process.env.UPLOAD_DIR ?? "uploads";
+export const FILE_RETENTION_TTL = process.env.FILE_RETENTION_TTL ?? "1h";
 /**
  * Shared in-memory file index used by upload and download routes.
  */
@@ -61,27 +62,83 @@ export const upload = hasUploadCap
 function ttlToMs(ttl) {
     const match = ttl.match(/^(\d+)([smhd])$/);
     if (!match)
-        return 24 * 60 * 60 * 1000;
+        return 60 * 60 * 1000;
     const n = parseInt(match[1], 10);
     const units = { s: 1_000, m: 60_000, h: 3_600_000, d: 86_400_000 };
     return n * units[match[2]];
+}
+/**
+ * Deletes a file from disk and from the in-memory file store.
+ */
+function deleteStoredFile(fileId) {
+    const file = files[fileId];
+    if (!file)
+        return;
+    fs.unlink(file.path, (err) => {
+        if (err && err.code !== "ENOENT") {
+            console.error(`Failed to delete file ${fileId}:`, err);
+        }
+    });
+    delete files[fileId];
+}
+/**
+ * Best-effort cleanup that removes stale upload files from disk.
+ * This also covers files left behind across server restarts.
+ */
+function cleanupExpiredFilesOnDisk() {
+    const retentionMs = ttlToMs(FILE_RETENTION_TTL);
+    const now = Date.now();
+    const storedPaths = new Set(Object.values(files).map((file) => file.path));
+    let entries;
+    try {
+        entries = fs.readdirSync(UPLOAD_DIR);
+    }
+    catch (err) {
+        console.error("Failed to read upload directory for cleanup:", err);
+        return;
+    }
+    for (const entry of entries) {
+        const fullPath = path.join(UPLOAD_DIR, entry);
+        let stats;
+        try {
+            stats = fs.statSync(fullPath);
+        }
+        catch {
+            continue;
+        }
+        if (!stats.isFile())
+            continue;
+        if (storedPaths.has(fullPath))
+            continue;
+        if (now - stats.mtimeMs >= retentionMs) {
+            fs.unlink(fullPath, (err) => {
+                if (err && err.code !== "ENOENT") {
+                    console.error(`Failed to delete stale file ${fullPath}:`, err);
+                }
+            });
+        }
+    }
+}
+/**
+ * Starts periodic cleanup for stale uploads that are not tracked in memory
+ * (for example, files left after a process restart).
+ */
+function startUploadCleanupLoop() {
+    cleanupExpiredFilesOnDisk();
+    const intervalMs = 10 * 60 * 1000;
+    const timer = setInterval(cleanupExpiredFilesOnDisk, intervalMs);
+    timer.unref?.();
 }
 /**
  * Schedules a file to be deleted from disk and removed from the in-memory store
  * once its download link TTL has elapsed. This keeps the server clean without
  * needing a separate cron job.
  */
-export function scheduleFileDeletion(fileId, ttl) {
+export function scheduleFileDeletion(fileId, ttl = FILE_RETENTION_TTL) {
     const delayMs = ttlToMs(ttl);
-    setTimeout(() => {
-        const file = files[fileId];
-        if (!file)
-            return;
-        fs.unlink(file.path, (err) => {
-            if (err && err.code !== "ENOENT") {
-                console.error(`Failed to delete file ${fileId}:`, err);
-            }
-        });
-        delete files[fileId];
+    const timer = setTimeout(() => {
+        deleteStoredFile(fileId);
     }, delayMs);
+    timer.unref?.();
 }
+startUploadCleanupLoop();

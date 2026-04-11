@@ -36,18 +36,16 @@ export default function createUploadRouter({ upload, files, baseUrl, }) {
         const fileId = path.parse(req.file.filename).name;
         // Store the file metadata in the in-memory file index
         files[fileId] = { path: req.file.path, originalname: req.file.originalname };
-        // Sign a per-file download token scoped to this file ID only
-        // Lifetime defaults to 24h, override with DOWNLOAD_LINK_TTL env var (e.g. "7d", "1h")
-        const ttlStr = process.env.DOWNLOAD_LINK_TTL ?? "24h";
+        // Sign a per-file download token scoped to this file ID only.
+        // Lifetime defaults to 1h, override with DOWNLOAD_LINK_TTL (e.g. "30m", "2h").
+        const ttlStr = process.env.DOWNLOAD_LINK_TTL ?? "1h";
         const ttl = ttlStr;
         const downloadToken = jwt.sign({ sub: fileId, purpose: "download" }, secret, {
             expiresIn: ttl,
         });
-        // Schedule the file to be wiped once the link expires
-        scheduleFileDeletion(fileId, ttlStr);
-        const requestBaseUrl = `${req.protocol}://${req.get("host")}`;
-        const resolvedBaseUrl = baseUrl ?? requestBaseUrl;
-        const link = `${resolvedBaseUrl}/download/${fileId}?token=${encodeURIComponent(downloadToken)}`;
+        // Schedule file deletion using retention policy (defaults to 1h).
+        scheduleFileDeletion(fileId);
+        const link = `${baseUrl}/download/${fileId}?token=${encodeURIComponent(downloadToken)}`;
         res.json({ link });
     });
     return router;

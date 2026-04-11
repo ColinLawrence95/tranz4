@@ -1,20 +1,22 @@
-@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap");
 @import "tailwindcss";
 
 :root {
-  font-family: "Roboto", sans-serif;
+  --font-sans: "Orbitron", sans-serif;
+  --default-font-family: var(--font-sans);
+  font-family: var(--font-sans);
 }
 
 html,
 body {
-  font-family: "Roboto", sans-serif;
+  font-family: var(--font-sans);
   margin: 0;
   min-height: 100%;
 }
 
 html {
   --s: 100px;
-  --c1: #070401;
+  --c1: #0d0702;
   --c2: #030303;
   --_s: calc(2 * var(--s)) calc(2 * var(--s));
   --_g: var(--_s) conic-gradient(at 40% 40%, #0000 75%, var(--c1) 0);
@@ -25,7 +27,7 @@ html {
     calc(0.7 * var(--s)) calc(0.7 * var(--s)) / var(--_g),
     calc(-0.3 * var(--s)) calc(-0.3 * var(--s)) / var(--_g),
     conic-gradient(from 90deg at 20% 20%, var(--c2) 25%, var(--c1) 0) 0 0 / var(--s) var(--s);
-  animation: page-bg-shift 60s infinite;
+  animation: page-bg-shift 20s infinite;
 }
 
 body {
@@ -33,7 +35,7 @@ body {
 }
 
 #root {
-  font-family: "Roboto", sans-serif;
+  font-family: var(--font-sans);
 }
 
 input,
