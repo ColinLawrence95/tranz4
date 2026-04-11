@@ -45,7 +45,9 @@ export default function createUploadRouter({ upload, files, baseUrl, }) {
         });
         // Schedule the file to be wiped once the link expires
         scheduleFileDeletion(fileId, ttlStr);
-        const link = `${baseUrl}/download/${fileId}?token=${encodeURIComponent(downloadToken)}`;
+        const requestBaseUrl = `${req.protocol}://${req.get("host")}`;
+        const resolvedBaseUrl = baseUrl ?? requestBaseUrl;
+        const link = `${resolvedBaseUrl}/download/${fileId}?token=${encodeURIComponent(downloadToken)}`;
         res.json({ link });
     });
     return router;

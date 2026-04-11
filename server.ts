@@ -9,7 +9,7 @@ import { requireUploadToken } from "./lib/jwt-auth.ts";
 
 const app = express();
 const PORT = Number.parseInt(process.env.PORT ?? "3000", 10);
-const BASE_URL = process.env.BASE_URL ?? `http://tranz4.org:${PORT}`;
+const BASE_URL = process.env.BASE_URL ?? `http://localhost:${PORT}`;
 
 app.use(cors());
 app.use(express.json({ limit: "10mb" }));
